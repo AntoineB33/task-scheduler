@@ -1,0 +1,14 @@
+{
+	"properties": [
+		{
+			"name": "app.jwt.secret",
+			"type": "java.lang.String",
+			"description": "HS256 signing secret; UTF-8 byte length must be at least 32. Override in production."
+		},
+		{
+			"name": "app.jwt.expiration-ms",
+			"type": "java.lang.Long",
+			"description": "JWT lifetime in milliseconds."
+		}
+	]
+}

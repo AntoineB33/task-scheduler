@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.util.UUID;
@@ -23,6 +24,11 @@ public class Task {
 
 	private double minDuration;
 
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "owner_id", nullable = false)
+	@JsonIgnore
+	private AppUser owner;
+
 	@OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
 	@JoinColumn(name = "child_list_id")
 	@JsonIgnore
@@ -31,9 +37,10 @@ public class Task {
 	public Task() {
 	}
 
-	public Task(String name, double minDuration) {
+	public Task(String name, double minDuration, AppUser owner) {
 		this.name = name;
 		this.minDuration = minDuration;
+		this.owner = owner;
 	}
 
 	public UUID getId() {
@@ -58,6 +65,14 @@ public class Task {
 
 	public void setMinDuration(double minDuration) {
 		this.minDuration = minDuration;
+	}
+
+	public AppUser getOwner() {
+		return owner;
+	}
+
+	public void setOwner(AppUser owner) {
+		this.owner = owner;
 	}
 
 	public TaskList getChildList() {

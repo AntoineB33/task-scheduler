@@ -29,8 +29,8 @@ public class SchedulingService {
 	}
 
 	@Transactional(readOnly = true)
-	public Map<UUID, Double> calculateGlobalWeights(UUID rootListId) {
-		TaskList root = loadTree(rootListId);
+	public Map<UUID, Double> calculateGlobalWeights(UUID rootListId, UUID ownerId) {
+		TaskList root = loadOwnedRoot(rootListId, ownerId);
 		Map<UUID, Double> globalWeights = new HashMap<>();
 		Set<UUID> visiting = new HashSet<>();
 		traverse(root, 1.0, globalWeights, visiting);
@@ -43,12 +43,15 @@ public class SchedulingService {
 	 * Python sample's derived cycle length).
 	 */
 	@Transactional(readOnly = true)
-	public Map<UUID, Double> generateBaseCycleSchedule(UUID rootListId) {
-		Map<UUID, Double> globalWeights = calculateGlobalWeights(rootListId);
+	public Map<UUID, Double> generateBaseCycleSchedule(UUID rootListId, UUID ownerId) {
+		Map<UUID, Double> globalWeights = calculateGlobalWeights(rootListId, ownerId);
+		if (globalWeights.isEmpty()) {
+			return Map.of();
+		}
 
-		List<Task> allTasks = taskRepository.findAll();
+		List<Task> tasksInTree = taskRepository.findAllById(globalWeights.keySet());
 		double cycleDuration = 0.0;
-		for (Task task : allTasks) {
+		for (Task task : tasksInTree) {
 			double weight = globalWeights.getOrDefault(task.getId(), 0.0);
 			if (weight > 0) {
 				double requiredCycle = task.getMinDuration() / weight;
@@ -59,7 +62,7 @@ public class SchedulingService {
 		}
 
 		Map<UUID, Double> schedule = new HashMap<>();
-		for (Task task : allTasks) {
+		for (Task task : tasksInTree) {
 			double weight = globalWeights.getOrDefault(task.getId(), 0.0);
 			if (weight > 0) {
 				schedule.put(task.getId(), cycleDuration * weight);
@@ -69,13 +72,17 @@ public class SchedulingService {
 	}
 
 	@Transactional(readOnly = true)
-	public List<InfiniteTaskScheduler.Step> firstSchedulerCycles(UUID rootListId, int limit) {
+	public List<InfiniteTaskScheduler.Step> firstSchedulerCycles(UUID rootListId, UUID ownerId, int limit) {
 		if (limit < 1 || limit > 10_000) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "limit must be between 1 and 10000");
 		}
-		Map<UUID, Double> weights = calculateGlobalWeights(rootListId);
+		Map<UUID, Double> weights = calculateGlobalWeights(rootListId, ownerId);
+		boolean anyPositive = weights.values().stream().anyMatch(w -> w != null && w > 0);
+		if (!anyPositive) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "No leaf tasks with positive weight in this list");
+		}
 		Map<UUID, Double> durations = new HashMap<>();
-		for (Task t : taskRepository.findAll()) {
+		for (Task t : taskRepository.findAllById(weights.keySet())) {
 			durations.put(t.getId(), t.getMinDuration());
 		}
 		InfiniteTaskScheduler scheduler = new InfiniteTaskScheduler(weights, durations);
@@ -86,8 +93,8 @@ public class SchedulingService {
 		return out;
 	}
 
-	private TaskList loadTree(UUID rootListId) {
-		TaskList root = taskListRepository.findById(rootListId)
+	private TaskList loadOwnedRoot(UUID rootListId, UUID ownerId) {
+		TaskList root = taskListRepository.findByIdAndOwner_Id(rootListId, ownerId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task list not found"));
 		initialiseTree(root);
 		return root;

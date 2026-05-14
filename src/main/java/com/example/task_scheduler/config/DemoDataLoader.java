@@ -1,8 +1,10 @@
 package com.example.task_scheduler.config;
 
+import com.example.task_scheduler.entity.AppUser;
 import com.example.task_scheduler.entity.Task;
 import com.example.task_scheduler.entity.TaskAssignment;
 import com.example.task_scheduler.entity.TaskList;
+import com.example.task_scheduler.repository.AppUserRepository;
 import com.example.task_scheduler.repository.TaskListRepository;
 import com.example.task_scheduler.repository.TaskRepository;
 import java.util.LinkedHashMap;
@@ -11,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,73 +29,83 @@ public class DemoDataLoader implements ApplicationRunner {
 
 	private final TaskRepository taskRepository;
 	private final TaskListRepository taskListRepository;
+	private final AppUserRepository appUserRepository;
+	private final PasswordEncoder passwordEncoder;
 
-	public DemoDataLoader(TaskRepository taskRepository, TaskListRepository taskListRepository) {
+	public DemoDataLoader(
+			TaskRepository taskRepository,
+			TaskListRepository taskListRepository,
+			AppUserRepository appUserRepository,
+			PasswordEncoder passwordEncoder) {
 		this.taskRepository = taskRepository;
 		this.taskListRepository = taskListRepository;
+		this.appUserRepository = appUserRepository;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	@Override
 	@Transactional
 	public void run(ApplicationArguments args) {
-		if (taskListRepository.count() > 0) {
+		AppUser demo = appUserRepository.findByUsername("demo")
+				.orElseGet(() -> appUserRepository.save(new AppUser("demo", passwordEncoder.encode("demo"))));
+		if (taskListRepository.existsByOwner_Id(demo.getId())) {
 			return;
 		}
 
 		Map<String, Task> tasks = new LinkedHashMap<>();
-		putTask(tasks, "get a job interview", DEFAULT_MIN_DURATION);
-		putTask(tasks, "succeed in the job interview", DEFAULT_MIN_DURATION);
-		putTask(tasks, "Java scheduler", DEFAULT_MIN_DURATION);
-		putTask(tasks, "ANC", DEFAULT_MIN_DURATION);
-		putTask(tasks, "underwear", DEFAULT_MIN_DURATION);
-		putTask(tasks, "finance", DEFAULT_MIN_DURATION);
-		putTask(tasks, "other", DEFAULT_MIN_DURATION);
-		putTask(tasks, "apply", DEFAULT_MIN_DURATION);
-		putTask(tasks, "portfolio", DEFAULT_MIN_DURATION);
-		putTask(tasks, "extend CV", DEFAULT_MIN_DURATION);
-		putTask(tasks, "english", DEFAULT_MIN_DURATION);
-		putTask(tasks, "java/springBoot certifications", DEFAULT_MIN_DURATION);
-		putTask(tasks, "projet Kotlin", DEFAULT_MIN_DURATION);
-		putTask(tasks, "l'offre", DEFAULT_MIN_DURATION);
-		putTask(tasks, "entreprise", DEFAULT_MIN_DURATION);
-		putTask(tasks, "RH", DEFAULT_MIN_DURATION);
-		putTask(tasks, "technique", DEFAULT_MIN_DURATION);
-		putTask(tasks, "logique", DEFAULT_MIN_DURATION);
-		putTask(tasks, "CEO", DEFAULT_MIN_DURATION);
-		putTask(tasks, "questions", DEFAULT_MIN_DURATION);
-		putTask(tasks, "soft skills", DEFAULT_MIN_DURATION);
-		putTask(tasks, "coder", DEFAULT_MIN_DURATION);
-		putTask(tasks, "LCM", DEFAULT_MIN_DURATION);
-		putTask(tasks, "Python", DEFAULT_MIN_DURATION);
-		putTask(tasks, "CV", DEFAULT_MIN_DURATION);
-		putTask(tasks, "Java", DEFAULT_MIN_DURATION);
-		putTask(tasks, "Spring Boot", DEFAULT_MIN_DURATION);
-		putTask(tasks, "négociation", DEFAULT_MIN_DURATION);
-		putTask(tasks, "communiquer régulièrement", DEFAULT_MIN_DURATION);
-		putTask(tasks, "infinite nested list", DEFAULT_MIN_DURATION);
-		putTask(tasks, "eye care scheduler", DEFAULT_MIN_DURATION);
-		putTask(tasks, "food planner", DEFAULT_MIN_DURATION);
-		putTask(tasks, "media sorting spreadsheet", DEFAULT_MIN_DURATION);
-		putTask(tasks, "english listen", DEFAULT_MIN_DURATION);
-		putTask(tasks, "english speak", DEFAULT_MIN_DURATION);
-		putTask(tasks, "english write", DEFAULT_MIN_DURATION);
-		putTask(tasks, "Gemini discussion", DEFAULT_MIN_DURATION);
-		putTask(tasks, "vocabulary", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "get a job interview", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "succeed in the job interview", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "Java scheduler", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "ANC", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "underwear", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "finance", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "other", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "apply", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "portfolio", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "extend CV", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "english", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "java/springBoot certifications", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "projet Kotlin", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "l'offre", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "entreprise", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "RH", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "technique", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "logique", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "CEO", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "questions", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "soft skills", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "coder", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "LCM", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "Python", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "CV", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "Java", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "Spring Boot", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "négociation", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "communiquer régulièrement", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "infinite nested list", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "eye care scheduler", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "food planner", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "media sorting spreadsheet", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "english listen", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "english speak", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "english write", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "Gemini discussion", DEFAULT_MIN_DURATION);
+		putTask(tasks, demo, "vocabulary", DEFAULT_MIN_DURATION);
 
 		Map<String, TaskList> lists = new LinkedHashMap<>();
 
-		lists.put("root", list("root", true, 0.75));
-		lists.put("get a job interview", list("get a job interview", true, 0.75));
-		lists.put("extend CV", list("extend CV", true, 0.5));
-		lists.put("succeed in the job interview", list("succeed in the job interview", false, null));
-		lists.put("RH", list("RH", true, null));
-		lists.put("technique", list("technique", true, 0.8));
-		lists.put("coder", list("coder", true, null));
-		lists.put("CEO", list("CEO", true, null));
-		lists.put("soft skills", list("soft skills", true, null));
-		lists.put("projet Kotlin", list("projet Kotlin", true, null));
-		lists.put("english", list("english", true, null));
-		lists.put("english listen", list("english listen", true, null));
+		lists.put("root", list("root", true, 0.75, demo));
+		lists.put("get a job interview", list("get a job interview", true, 0.75, demo));
+		lists.put("extend CV", list("extend CV", true, 0.5, demo));
+		lists.put("succeed in the job interview", list("succeed in the job interview", false, null, demo));
+		lists.put("RH", list("RH", true, null, demo));
+		lists.put("technique", list("technique", true, 0.8, demo));
+		lists.put("coder", list("coder", true, null, demo));
+		lists.put("CEO", list("CEO", true, null, demo));
+		lists.put("soft skills", list("soft skills", true, null, demo));
+		lists.put("projet Kotlin", list("projet Kotlin", true, null, demo));
+		lists.put("english", list("english", true, null, demo));
+		lists.put("english listen", list("english listen", true, null, demo));
 
 		for (TaskList l : lists.values()) {
 			taskListRepository.save(l);
@@ -143,19 +156,18 @@ public class DemoDataLoader implements ApplicationRunner {
 		}
 
 		TaskList root = lists.get("root");
-		log.info("Demo data loaded. Root task list id: {} — GET /api/schedule/{}/global-weights", root.getId(),
-				root.getId());
+		log.info("Demo data for user 'demo' (password: demo). Root list id: {} — use Bearer token from POST /api/auth/login", root.getId());
 	}
 
-	private static TaskList list(String name, boolean implicit, Double decreaseFactor) {
-		TaskList l = new TaskList(name);
+	private static TaskList list(String name, boolean implicit, Double decreaseFactor, AppUser owner) {
+		TaskList l = new TaskList(name, owner);
 		l.setImplicitWeights(implicit);
 		l.setDecreaseFactor(decreaseFactor);
 		return l;
 	}
 
-	private void putTask(Map<String, Task> tasks, String name, double minDuration) {
-		tasks.put(name, taskRepository.save(new Task(name, minDuration)));
+	private void putTask(Map<String, Task> tasks, AppUser owner, String name, double minDuration) {
+		tasks.put(name, taskRepository.save(new Task(name, minDuration, owner)));
 	}
 
 	private static void addImplicit(TaskList list, Map<String, Task> tasks, String... taskNames) {

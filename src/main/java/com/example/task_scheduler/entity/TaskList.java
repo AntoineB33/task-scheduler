@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
@@ -22,6 +24,11 @@ public class TaskList {
 	private UUID id;
 
 	private String name;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "owner_id", nullable = false)
+	@JsonIgnore
+	private AppUser owner;
 
 	/**
 	 * When true, sibling weights are derived from {@link #decreaseFactor} and assignment order
@@ -44,8 +51,9 @@ public class TaskList {
 	public TaskList() {
 	}
 
-	public TaskList(String name) {
+	public TaskList(String name, AppUser owner) {
 		this.name = name;
+		this.owner = owner;
 	}
 
 	public UUID getId() {
@@ -62,6 +70,14 @@ public class TaskList {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public AppUser getOwner() {
+		return owner;
+	}
+
+	public void setOwner(AppUser owner) {
+		this.owner = owner;
 	}
 
 	public boolean isImplicitWeights() {
