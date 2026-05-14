@@ -28,5 +28,7 @@ class ScheduleControllerTest {
 				.orElseThrow()
 				.getId();
 		mockMvc.perform(get("/api/schedule/{id}", rootId)).andExpect(status().isOk());
+		mockMvc.perform(get("/api/schedule/{id}/global-weights", rootId)).andExpect(status().isOk());
+		mockMvc.perform(get("/api/schedule/{id}/cycles", rootId).param("limit", "5")).andExpect(status().isOk());
 	}
 }

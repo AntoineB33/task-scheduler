@@ -25,8 +25,11 @@ public class TaskAssignment {
 	@JoinColumn(name = "task_id")
 	private Task task;
 
-	/** Share of the parent list, e.g. 50.0 means 50%. */
+	/** Share of the parent list when explicit mode is used, e.g. 50.0 means 50%. */
 	private double percentage;
+
+	/** Ordering within the parent list (implicit geometric / equal modes rely on order). */
+	private int assignmentOrder;
 
 	public TaskAssignment() {
 	}
@@ -66,5 +69,13 @@ public class TaskAssignment {
 
 	public void setPercentage(double percentage) {
 		this.percentage = percentage;
+	}
+
+	public int getAssignmentOrder() {
+		return assignmentOrder;
+	}
+
+	public void setAssignmentOrder(int assignmentOrder) {
+		this.assignmentOrder = assignmentOrder;
 	}
 }
